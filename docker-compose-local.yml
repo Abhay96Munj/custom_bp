@@ -1,0 +1,67 @@
+volumes:
+  dbdata: {}
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    image: project
+    volumes:
+      - ./backend:/home/user/app/backend:rw
+    env_file:
+      - ./.envs/local/.django
+    ports:
+      - 8001:8000
+    depends_on:
+      - db
+  db:
+    image: "postgres:16-alpine"
+    env_file:
+      - ./.envs/local/.django
+    ports:
+      - "5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data:delegated
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8000:8080
+  # nginx:
+  #   build:
+  #     context: .
+  #     dockerfile: ./backend/Dockerfile-nginx
+  #   restart: always
+  #   volumes:
+  #     - ./backend/static:/backend/static
+  #   ports:
+  #     - 80:80
+  #   depends_on:
+  #     - django
+  celery:
+    <<: *django
+    command: celery -A core worker --loglevel=info
+    depends_on:
+      - django
+      - redis
+    ports: []
+    entrypoint: []
+
+  celery-beat:
+    <<: *django
+    command: celery -A core beat --loglevel=info
+    depends_on:
+      - django
+      - redis
+    ports: []
+    entrypoint: []
+
+  redis:
+    image: "redis:alpine"
+    ports: []
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"

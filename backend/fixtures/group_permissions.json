@@ -1,0 +1,66 @@
+[
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Admin",
+            "permissions": [
+                ["user_view",   "accounts", "user"],
+                ["user_create", "accounts", "user"],
+                ["user_edit",   "accounts", "user"],
+                ["user_delete", "accounts", "user"],
+                ["role_manage", "accounts", "user"],
+                ["report_view", "accounts", "user"]
+            ]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Super Admin",
+            "permissions": [
+                ["user_view",   "accounts", "user"],
+                ["user_create", "accounts", "user"],
+                ["user_edit",   "accounts", "user"],
+                ["user_delete", "accounts", "user"],
+                ["role_manage", "accounts", "user"],
+                ["hr_view",     "accounts", "user"],
+                ["report_view", "accounts", "user"]
+            ]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "HR",
+            "permissions": [
+                ["user_view",   "accounts", "user"],
+                ["hr_view",     "accounts", "user"],
+                ["report_view", "accounts", "user"]
+            ]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Manager",
+            "permissions": [
+                ["user_view",   "accounts", "user"],
+                ["report_view", "accounts", "user"]
+            ]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Worker",
+            "permissions": []
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "User",
+            "permissions": []
+        }
+    }
+]

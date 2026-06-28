@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Invitation to Join Project_Name</title>
+</head>
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333;">
+    <div style="max-width: 600px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);">
+        <!-- Logo -->
+        <div style="text-align: center; margin-bottom: 30px;">
+            <img src="cid:company_logo" alt="Project_Name" style="height: 60px;" />
+        </div>
+
+        <!-- Greeting -->
+        <h2 style="color: #2a2a2a;">Hello {{ user.first_name }},</h2>
+        <p style="font-size: 16px;">You have been invited to join <strong>Project_Name</strong>!</p>
+        <p style="font-size: 16px;">To accept your invitation and set up your account password, please click the button below or go to the platform, request a password reset OTP using your email, verify it, and set your new password.</p>
+
+        <!-- Instructions Info -->
+        <div style="background-color: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 25px 0; text-align: center;">
+            <p style="font-size: 16px; color: #333; margin: 0 0 10px 0;"><strong>How to get started:</strong></p>
+            <p style="font-size: 14px; color: #555; margin: 0;">Go to the login screen, click "Forgot Password", enter your email <strong>{{ user.email }}</strong>, and enter the OTP you receive to set your password.</p>
+        </div>
+
+        <p style="font-size: 16px;">If you were not expecting this invitation, please ignore this email.</p>
+
+        <p style="font-size: 16px; color: #0ea5e9;"><strong>Welcome aboard!</strong></p>
+
+        <!-- Footer -->
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;" />
+        <p style="font-size: 14px; color: #666;">Need help? Contact us at {{ from_email }}</p>
+        <p style="font-size: 12px; color: #999; text-align: center;">&copy; {{ now_year }} Project_Name. All rights reserved.</p>
+    </div>
+</body>
+</html>
