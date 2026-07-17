@@ -1,0 +1,31 @@
+PYTHONFAULTHANDLER=1
+PYTHONUNBUFFERED=1
+PYTHONHASHSEED=random
+PIP_NO_CACHE_DIR=off
+PIP_DISABLE_PIP_VERSION_CHECK=on
+PIP_DEFAULT_TIMEOUT=100
+
+# Local development only — never reuse this key outside local dev.
+DJANGO_SECRET_KEY=django-insecure-b2754754409bb8c644cff387b4d05b72d0c9908af59e73b2ea8d449b480ca4bc
+DJANGO_SETTINGS_MODULE=core.settings.local
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=postgres
+DB_HOST=db
+DB_PORT=5432
+PGDATA=/var/lib/postgresql/data/pgdata
+DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+
+CELERY_BROKER_URL=redis://redis:6379/0
+REDIS_CACHE_URL=redis://redis:6379/1
+
+EMAIL_HOST=mailhog
+EMAIL_PORT=1025
+EMAIL_HOST_USER=""
+EMAIL_HOST_PASSWORD=""
+DEFAULT_FROM_EMAIL=no-reply@example.com
+
+# Superuser auto-created by the entrypoint when both are set.
+DJANGO_SUPERUSER_EMAIL=admin@example.com
+DJANGO_SUPERUSER_PASSWORD=local-admin-password

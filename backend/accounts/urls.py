@@ -1,3 +1,7 @@
+from django.urls import path
+from rest_framework import routers
+from rest_framework_simplejwt.views import TokenVerifyView
+
 from .views import (
     SignupApiView,
     LoginApiView,
@@ -13,28 +17,15 @@ from .views import (
     State_List,
     AddressViewSet,
     ChangePasswordApiView,
-    AllowedUserViewSet,
-    AddUserApiView
+    AddUserApiView,
+    AdminUserViewSet,
 )
-
-# from .web_views import *
-from django.urls import path
-from django.contrib import admin
-from rest_framework_simplejwt.views import (
-    TokenVerifyView,
-)
-from rest_framework import routers
-from .views import AdminUserViewSet
-
-admin.autodiscover()
-
 
 app_name = "accounts"
 
 router = routers.DefaultRouter()
 router.register(r"address", AddressViewSet)
 router.register(r"admin-users", AdminUserViewSet, basename="admin-user")
-router.register(r"allowed-users", AllowedUserViewSet, basename="allowed-users")
 
 
 urlpatterns = [
@@ -51,22 +42,18 @@ urlpatterns = [
     path("verify-otp/", VerifyOtpView.as_view(), name="verify-otp"),
     path("add-user/", AddUserApiView.as_view(), name="add-user"),
     path("request-otp/", ForgotPasswordRequestOtpView.as_view(), name="request-otp"),
-    path(
-        "reset-password/",
-        ResetPasswordView.as_view(),
-        name="reset-password",
-    ),
-    path("country-list/", Country_State_List.as_view(), name="country-state-list"),
+    path("reset-password/", ResetPasswordView.as_view(), name="reset-password"),
+    path("country-list/", Country_State_List.as_view(), name="country-list"),
     path(
         "country-list/<int:pk>/",
         Country_State_List.as_view(),
-        name="country-state-list",
+        name="country-detail",
     ),
-    path("state-list/", State_List.as_view(), name="country-state-list"),
+    path("state-list/", State_List.as_view(), name="state-list"),
     path(
         "state-list/<int:pk>/",
         State_List.as_view(),
-        name="country-state-list",
+        name="state-detail",
     ),
 ]
 

@@ -1,24 +1,29 @@
-from pathlib import Path
+import os
 from datetime import timedelta
+from pathlib import Path
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-dc3804079cbecebc38a815b17a5e23b3d70a027891c01e838b840effbee66dd6"
+# No default here — local.py provides a dev-only fallback and prod.py
+# refuses to start without the environment variable.
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["192.168.71.83"]
+ALLOWED_HOSTS = [
+    host
+    for host in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if host
+]
 
 AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = ["accounts.backend.EmailLoginBackend"]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -30,10 +35,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
+    "drf_spectacular",
     "accounts",
     "rest_framework_simplejwt.token_blacklist",
-    "django_otp",
-    "django_otp.plugins.otp_totp",
 ]
 
 MIDDLEWARE = [
@@ -46,7 +50,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'django_otp.middleware.OTPMiddleware',
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -70,18 +73,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#         "ATOMIC_REQUESTS": True,  # Enable atomic requests for SQLite
-#     }
-# }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -91,6 +82,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 10},
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -106,17 +98,21 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "Asia/Kolkata"
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+# Static and media files
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -124,13 +120,15 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# REST FRAME WORK SETTINGS
+# REST FRAMEWORK SETTINGS
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PAGINATION_CLASS": "core.pagination.BasePagination",
     "PAGE_SIZE": 10,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
@@ -138,14 +136,25 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "100/hour",
         "user": "1000/hour",
+        # Scoped rates for sensitive endpoints (see accounts/views.py):
+        "login": "30/hour",
+        "otp": "10/hour",
+        "otp_verify": "30/hour",
     },
     "EXCEPTION_HANDLER": "accounts.views.custom_exception_handler",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Project_Name API",
+    "DESCRIPTION": "API documentation",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://redis:6379/1",
+        "LOCATION": os.getenv("REDIS_CACHE_URL", "redis://redis:6379/1"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
@@ -162,6 +171,8 @@ STORAGES = {
 }
 
 
+# SIGNING_KEY is intentionally omitted — simplejwt uses settings.SECRET_KEY
+# at call time, so environment-specific overrides of SECRET_KEY apply.
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
@@ -169,7 +180,6 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS256",
-    "SIGNING_KEY": SECRET_KEY,
 }
 
 
@@ -178,3 +188,32 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

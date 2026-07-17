@@ -17,18 +17,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='AllowedUser',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('email', models.EmailField(max_length=254, unique=True)),
-            ],
-            options={
-                'abstract': False,
-            },
-        ),
-        migrations.CreateModel(
             name='Country',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -50,7 +38,7 @@ class Migration(migrations.Migration):
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('first_name', models.CharField(max_length=30)),
                 ('last_name', models.CharField(max_length=30)),
-                ('username', models.CharField(blank=True, max_length=254, null=True)),
+                ('username', models.CharField(blank=True, max_length=150, unique=True)),
                 ('email', models.EmailField(max_length=254, unique=True)),
                 ('mobile_code', models.CharField(blank=True, max_length=30, null=True)),
                 ('mobile_no', models.CharField(blank=True, max_length=30, null=True)),
@@ -62,7 +50,6 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True, null=True)),
                 ('timezone', models.CharField(blank=True, max_length=50, null=True)),
-                ('failed_login_attempts', models.PositiveIntegerField(default=0)),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
             ],
@@ -94,10 +81,9 @@ class Migration(migrations.Migration):
                 ('city', models.CharField(blank=True, max_length=50, null=True)),
                 ('pincode', models.CharField(blank=True, max_length=10, null=True)),
                 ('address_type', models.CharField(default='user', max_length=50)),
-                ('deleted_at', models.DateTimeField(blank=True, null=True)),
                 ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='addresses', to=settings.AUTH_USER_MODEL)),
-                ('country', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='country', to='accounts.country')),
-                ('state', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='state', to='accounts.state')),
+                ('country', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='addresses', to='accounts.country')),
+                ('state', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='addresses', to='accounts.state')),
             ],
             options={
                 'abstract': False,

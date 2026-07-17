@@ -6,8 +6,8 @@ This is a comprehensive, production-ready backend boilerplate built with Django,
 
 ## 🚀 Key Features
 * **Package Management**: Powered by [uv](https://github.com/astral-sh/uv) (standards-compliant, extremely fast PEP 621 environment).
-* **API Framework**: Django REST Framework (DRF) with custom JSON responders, simplejwt authentication, and API schema decorators.
-* **Authentication**: JWT-based login/logout, OTP verification, password reset workflows, and TOTP/2FA support.
+* **API Framework**: Django REST Framework (DRF) with custom JSON responders, simplejwt authentication, and drf-spectacular API docs (`/api/docs/`).
+* **Authentication**: JWT-based login/logout, single-use email OTP verification (cache-backed), password reset and invite workflows, and login lockout after repeated failures.
 * **Task Queues & Caching**: Celery + Celery Beat + Redis setup for handling asynchronous tasks and periodic schedules.
 * **Database**: PostgreSQL integration with pre-configured health checks.
 * **Email Testing**: Outbox mail redirection captured by Mailhog.
@@ -93,7 +93,12 @@ Running via Docker Compose spins up PostgreSQL, Redis, Mailhog, Adminer, Celery,
    * Runs migrations.
    * Loads groups & user permission fixtures (`roles.json`, `group_permissions.json`).
    * Populates geographical data.
-   * Auto-creates a superuser with `--noinput`.
+   * Auto-creates a superuser when `DJANGO_SUPERUSER_EMAIL` and `DJANGO_SUPERUSER_PASSWORD` are set (see `.envs/local/.django`).
+
+5. **Settings modules:**
+   * `core.settings.local` — local/dev default (used by Docker Compose).
+   * `core.settings.dev` — local + CORS/CSRF origins for a separate frontend.
+   * `core.settings.prod` — production; requires `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, `DATABASE_URL`, and `CELERY_BROKER_URL` environment variables and enables HTTPS security headers.
 
 ---
 

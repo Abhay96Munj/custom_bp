@@ -10,6 +10,7 @@ class UserAdmin(BaseUserAdmin):
     list_display = (
         "id",
         "email",
+        "username",
         "mobile_no",
         "is_staff",
         "is_active",
@@ -17,37 +18,50 @@ class UserAdmin(BaseUserAdmin):
         "updated_at",
     )
     list_filter = ("is_staff", "is_active", "created_at", "updated_at")
-    search_fields = ("email", "mobile_no")
+    search_fields = ("email", "username", "mobile_no")
     ordering = ("-created_at",)
     readonly_fields = ("created_at", "updated_at")
 
-    fieldsets = BaseUserAdmin.fieldsets + (
+    fieldsets = (
+        (None, {"fields": ("email", "password")}),
         (
-            "Extra Fields",
+            "Personal info",
             {
                 "fields": (
+                    "username",
+                    "first_name",
+                    "last_name",
                     "mobile_code",
                     "mobile_no",
                     "gender",
                     "profile_pic",
                     "timezone",
-                    "failed_login_attempts",
                 )
             },
         ),
-    )
-    add_fieldsets = BaseUserAdmin.add_fieldsets + (
         (
-            "Extra Fields",
+            "Permissions",
             {
                 "fields": (
-                    "mobile_code",
-                    "mobile_no",
-                    "gender",
-                    "profile_pic",
-                    "timezone",
-                    "failed_login_attempts",
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
                 )
+            },
+        ),
+        (
+            "Important dates",
+            {"fields": ("last_login", "date_joined", "created_at", "updated_at")},
+        ),
+    )
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2"),
             },
         ),
     )

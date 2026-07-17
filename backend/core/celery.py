@@ -1,7 +1,5 @@
 import os
 
-from django.conf import settings  # noqa
-
 from celery import Celery
 
 

@@ -1,5 +1,3 @@
-from .constants import *  # noqa
-from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
@@ -8,29 +6,17 @@ User = get_user_model()
 
 
 class EmailLoginBackend(ModelBackend):
-    def authenticate(
-        self, request, username=None, password=None, role_id=None, **kwargs
-    ) -> dict:
-        """
-        This method is used for authenticating user using email or mobile number.
-        If username is email then it will try to find user by email otherwise it will try to find user by mobile number.
+    """
+    Authenticates users by email (case-insensitive) and password.
 
-        Args:
-            request (drf_request): django request
-            username (str): email or mobile number
-            password (str):  password
-        Returns:
-            dict: if user is authenticated then it will return user object, access token, refresh token
-            else None
+    Returns the user regardless of is_active — the login view decides how to
+    respond to inactive accounts.
+    """
 
-        """
-        user = None
-        try:
-            user = User.objects.filter(Q(email=username) | Q(mobile_no=username)).last()
-        except User.DoesNotExist:
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        if not username or not password:
             return None
-        if user is None:
-            return None
-        if user.check_password(password):
+        user = User.objects.filter(email__iexact=username).first()
+        if user and user.check_password(password):
             return user
         return None

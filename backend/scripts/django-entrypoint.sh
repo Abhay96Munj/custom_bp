@@ -24,31 +24,29 @@ while not db_ready:
         time.sleep(2)
 EOF
 
-echo "Database is ready!"
-
-
 if [ $# -eq 0 ]; then
-    echo "No arguments provided, skipping command execution."
     echo "Running Migration"
     python manage.py migrate
 
     echo "Populating Groups (roles)..."
     python manage.py loaddata fixtures/roles.json
-    
+
     echo "Assigning permissions to groups..."
     python manage.py loaddata fixtures/group_permissions.json
 
-    echo "Creating Admin User.."
+    echo "Populating geo data..."
     python manage.py populate_geo_data
 
-    echo "Creating Superuser..."
-    python manage.py createsuperuser --noinput 
+    if [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
+        echo "Creating Superuser..."
+        python manage.py createsuperuser --noinput || echo "Superuser already exists."
+    else
+        echo "DJANGO_SUPERUSER_EMAIL/DJANGO_SUPERUSER_PASSWORD not set; skipping superuser creation."
+    fi
 
     echo "Collecting static files..."
     python manage.py collectstatic --noinput
 
-    # nginx is commented out — ALB now handles reverse proxying on port 8080.
-    # Gunicorn binds directly on 0.0.0.0:8080 so the ALB can reach it.
     echo "Starting nginx..."
     nginx -g "daemon off;" &
 
@@ -57,7 +55,7 @@ if [ $# -eq 0 ]; then
         python -m debugpy --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8000 --nothreading --noreload
     else
         echo "Starting Gunicorn..."
-        gunicorn core.wsgi --log-file - -b 0.0.0.0:8000 --reload --workers 4 --timeout 120 --max-requests 1000 --max-requests-jitter 50
+        gunicorn core.wsgi --log-file - -b 0.0.0.0:8000 --workers 4 --timeout 120 --max-requests 1000 --max-requests-jitter 50
     fi
 else
     echo "Executing command: $@"

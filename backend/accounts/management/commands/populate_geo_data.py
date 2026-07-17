@@ -28,10 +28,9 @@ class Command(BaseCommand):
             country, created = Country.objects.get_or_create(
                 name=country_data["name"], code=country_data["iso3"]
             )
-            print(f"Country: {country.name}, Created: {created}")
+            self.stdout.write(f"Country: {country.name}, Created: {created}")
             for data in country_data.get("states", []):
                 State.objects.get_or_create(name=data["name"], country=country)
-                print(f"State: {data["name"]}")
 
         self.stdout.write(
             self.style.SUCCESS("Successfully populated country and state data")
